@@ -1,0 +1,25 @@
+{
+  "name": "t-jsf-600-ncy_3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EpitechMscProPromo2027/T-JSF-600-NCY_3.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EpitechMscProPromo2027/T-JSF-600-NCY_3/issues"
+  },
+  "homepage": "https://github.com/EpitechMscProPromo2027/T-JSF-600-NCY_3#readme",
+  "dependencies": {
+    "express": "^4.21.2",
+    "mongoose": "^8.9.3",
+    "socket.io": "^4.8.1"
+  }
+}
