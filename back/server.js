@@ -1,9 +1,9 @@
 // src/server.js
 const http = require('http');
-const app = require('./app');
-const { initSocket } = require('./sockets/socketHandler');
+const app = require('./src/app');
+const { initSocket } = require('./src/sockets/socketHandler');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
 
 // Initialiser Socket.IO sur le serveur

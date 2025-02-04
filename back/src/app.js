@@ -1,14 +1,17 @@
 // src/app.js
 const express = require('express');
-const apiRoutes = require('./routes/api');
+const cors = require('cors'); // Importer cors
+const channelRoutes = require('./routes/channelRoutes');
 const app = express();
 
-// Middlewares pour parser le JSON et gérer le CORS par exemple
+// Activer CORS pour toutes les routes
+app.use(cors());
+
+// Middleware pour parser le JSON
 app.use(express.json());
-// app.use(cors()); // à décommenter si besoin
 
 // Routes de l'API
-app.use('/api', apiRoutes);
+app.use('/channels', channelRoutes);
 
 // Middleware de gestion des erreurs (exemple simple)
 app.use((err, req, res, next) => {
