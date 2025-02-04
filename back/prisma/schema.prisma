@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -11,4 +7,62 @@ generator client {
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id                          String            @id @default(auto()) @map("_id") @db.ObjectId
+  nickname                    String            @unique
+  createdAt                   DateTime          @default(now())
+  // Relation avec les messages publics envoyés par l'utilisateur (optionnel)
+  messages                    Message[]
+  // Messages privés envoyés et reçus
+  sentPrivateMessages         PrivateMessage[]  @relation("SentMessages")
+  receivedPrivateMessages     PrivateMessage[]  @relation("ReceivedMessages")
+  // Appartenance aux canaux via le join model
+  memberships                 ChannelMembership[]
+}
+
+model Channel {
+  id          String              @id @default(auto()) @map("_id") @db.ObjectId
+  name        String              @unique
+  createdAt   DateTime            @default(now())
+  // Les messages envoyés sur ce canal
+  messages    Message[]
+  // Les membres de ce canal (relation many-to-many via un modèle intermédiaire)
+  memberships ChannelMembership[]
+}
+
+model Message {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  content     String
+  createdAt   DateTime @default(now())
+  // L'expéditeur du message (optionnel si l'on ne veut pas imposer lier un utilisateur)
+  sender      User?    @relation(fields: [senderId], references: [id])
+  senderId    String?  @db.ObjectId
+  // Le canal dans lequel le message a été envoyé
+  channel     Channel  @relation(fields: [channelId], references: [id])
+  channelId   String   @db.ObjectId
+}
+
+model PrivateMessage {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  content     String
+  createdAt   DateTime @default(now())
+  // L'expéditeur du message privé
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
+  senderId    String   @db.ObjectId
+  // Le destinataire du message privé
+  recipient   User     @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  recipientId String   @db.ObjectId
+}
+
+model ChannelMembership {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  joinedAt    DateTime @default(now())
+  // L'utilisateur qui rejoint
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String   @db.ObjectId
+  // Le canal auquel l'utilisateur rejoint
+  channel     Channel  @relation(fields: [channelId], references: [id])
+  channelId   String   @db.ObjectId
 }
