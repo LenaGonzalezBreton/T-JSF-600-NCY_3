@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes de l'API
-app.use('/channels', channelRoutes);
+app.use('/', channelRoutes);
 
 // Middleware de gestion des erreurs (exemple simple)
 app.use((err, req, res, next) => {

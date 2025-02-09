@@ -7,6 +7,7 @@ class Channel {
      * Récupère tous les canaux
      */
     static async findAll() {
+      console.log("findall")
         return prisma.channel.findMany();
     }
 
