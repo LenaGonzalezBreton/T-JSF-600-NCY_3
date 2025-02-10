@@ -1,6 +1,7 @@
-// Updated SignUpForm.js
+// front/src/SignUpForm.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { signup } from './services/authService';
 
 const SignUpForm = () => {
     const [formData, setFormData] = useState({
@@ -13,17 +14,21 @@ const SignUpForm = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.username || !formData.email || !formData.password) {
             setError('Tous les champs sont requis.');
             return;
         }
-        setError('');
-        navigate('/chat');
+        try {
+            await signup(formData.username, formData.email, formData.password);
+            navigate('/'); // Redirige vers la page de connexion après inscription
+        } catch (err) {
+            setError(err.message);
+        }
     };
 
     return (
@@ -34,6 +39,8 @@ const SignUpForm = () => {
             >
                 <h2 className="text-2xl font-bold text-center text-pink-900 mb-6">Créer un compte</h2>
                 {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+                {/* Champ Nom d'utilisateur */}
                 <div className="mb-4">
                     <label htmlFor="username" className="block text-sm text-pink-900 mb-1">Nom d'utilisateur</label>
                     <input
@@ -46,6 +53,8 @@ const SignUpForm = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-pink-200"
                     />
                 </div>
+
+                {/* Champ Email */}
                 <div className="mb-4">
                     <label htmlFor="email" className="block text-sm text-pink-900 mb-1">Email</label>
                     <input
@@ -58,6 +67,8 @@ const SignUpForm = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-pink-200"
                     />
                 </div>
+
+                {/* Champ Mot de passe */}
                 <div className="mb-4">
                     <label htmlFor="password" className="block text-sm text-pink-900 mb-1">Mot de passe</label>
                     <input
@@ -70,6 +81,7 @@ const SignUpForm = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-pink-200"
                     />
                 </div>
+
                 <button
                     type="submit"
                     className="w-full bg-pink-300 text-pink-900 py-2 px-4 rounded-lg hover:bg-pink-400 transition"
@@ -77,7 +89,6 @@ const SignUpForm = () => {
                     S'inscrire
                 </button>
 
-                {/* Lien pour s'inscrire */}
                 <p className="text-center text-sm text-pink-900 mt-4">
                     <a href="/" className="underline hover:text-pink-600">Se connecter</a>
                 </p>

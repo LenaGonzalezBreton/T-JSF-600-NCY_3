@@ -10,16 +10,16 @@ datasource db {
 }
 
 model User {
-  id                          String            @id @default(auto()) @map("_id") @db.ObjectId
-  nickname                    String            @unique
-  createdAt                   DateTime          @default(now())
-  // Relation avec les messages publics envoyés par l'utilisateur (optionnel)
-  messages                    Message[]
-  // Messages privés envoyés et reçus
-  sentPrivateMessages         PrivateMessage[]  @relation("SentMessages")
-  receivedPrivateMessages     PrivateMessage[]  @relation("ReceivedMessages")
-  // Appartenance aux canaux via le join model
-  memberships                 ChannelMembership[]
+  id                      String            @id @default(auto()) @map("_id") @db.ObjectId
+  nickname                String            @unique
+  email                   String            @unique
+  password                String
+  createdAt               DateTime          @default(now())
+  // Relations existantes
+  messages                Message[]
+  sentPrivateMessages     PrivateMessage[]  @relation("SentMessages")
+  receivedPrivateMessages PrivateMessage[]  @relation("ReceivedMessages")
+  memberships             ChannelMembership[]
 }
 
 model Channel {
