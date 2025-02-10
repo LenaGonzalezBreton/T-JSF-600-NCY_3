@@ -1,38 +1,41 @@
-// front/src/context/AuthContext.js
-import React, { createContext, useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode'; // Utilisez l'import nommé si nécessaire
+import { createContext, useState, useEffect } from "react";
+import socket from "../services/socket";
 
-export const AuthContext = createContext(null);
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [token, setToken] = useState(localStorage.getItem("token") || null);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        console.log("Token récupéré :", token);
         if (token) {
-            try {
-                const decoded = jwtDecode(token);
-                console.log("Token décodé :", decoded);
-                // Vérifier si le token est expiré (decoded.exp en secondes)
-                if (decoded.exp * 1000 < Date.now()) {
-                    console.warn("Le token est expiré.");
-                    localStorage.removeItem('token');
-                    setUser(null);
-                } else {
-                    // Stocker directement l'objet décodé dans le state user
-                    setUser(decoded);
-                }
-            } catch (error) {
-                console.error("Erreur lors du décodage du token :", error);
-                localStorage.removeItem('token');
-                setUser(null);
-            }
+            localStorage.setItem("token", token);
+            socket.auth = { token };
+            socket.connect();
+        } else {
+            socket.disconnect();
         }
-    }, []);
+    }, [token]);
+
+    const login = (email, password, callback) => {
+        socket.emit("login", { email, password }, (response) => {
+            if (response.success) {
+                setToken(response.token);
+                setUser(response.user);
+            }
+            callback(response);
+        });
+    };
+
+    const logout = () => {
+        setUser(null);
+        setToken(null);
+        localStorage.removeItem("token");
+        socket.disconnect();
+    };
 
     return (
-        <AuthContext.Provider value={{ user, setUser }}>
+        <AuthContext.Provider value={{ user, token, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

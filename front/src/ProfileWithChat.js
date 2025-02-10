@@ -23,6 +23,8 @@ const ProfileWithChat = () => {
                 <ChannelList />
             </div>
 
+            <LogoutButton />
+
             {/* Section centrale avec la chatbox */}
             <div className="flex-1 flex justify-center items-start p-4 w-full max-w-4xl mx-auto lg:px-8">
                 <ChatBox />

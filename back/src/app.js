@@ -7,7 +7,11 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 
 // Activer CORS pour toutes les routes
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000', // Autorise uniquement ton front-end
+    methods: 'GET,POST,PUT,DELETE',
+    allowedHeaders: 'Content-Type,Authorization'
+}));
 
 // Middleware pour parser le JSON
 app.use(express.json());
