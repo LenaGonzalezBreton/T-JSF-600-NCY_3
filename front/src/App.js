@@ -28,6 +28,7 @@ const App = () => {
                     <Route path="/" element={<Login/>}/>
                     <Route path="/signup" element={<SignUpForm/>}/>
                     <Route path="/chat" element={ user ? <ProfileWithChat /> : <Navigate to="/" /> } />
+                    <Route path="/test" element={ <ProfileWithChat /> } />
                 </Routes>
             </div>
         </Router>
