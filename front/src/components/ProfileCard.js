@@ -1,42 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { FiSettings } from 'react-icons/fi';
+import { updateProfile } from '../services/userService';
+import { AuthContext } from '../context/AuthContext';
 
-const ProfileCard = ({ user }) => {
-    const [isEditing, setIsEditing] = useState(false); // État pour savoir si on est en mode édition
-    const [editableUser, setEditableUser] = useState(user); // État pour stocker les informations modifiables
+const ProfileCard = () => {
+    const { user, setUser } = useContext(AuthContext); // 🔥 Récupère l'utilisateur depuis le contexte
+    const [isEditing, setIsEditing] = useState(false);
+    const [editableUser, setEditableUser] = useState(null);
+    const [error, setError] = useState('');
 
-    // Gestion des champs modifiables
+    // 🔥 Met à jour `editableUser` quand `user` est disponible
+    useEffect(() => {
+        if (user) {
+            setEditableUser(user);
+        }
+    }, [user]);
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setEditableUser((prevUser) => ({
-            ...prevUser,
-            [name]: value,
-        }));
+        setEditableUser(prevUser => ({ ...prevUser, [name]: value }));
     };
 
-    // Gestion du mode édition
-    const toggleEditing = () => {
-        if (isEditing) {
-            // Action pour sauvegarder les modifications (par exemple, envoyer à une API)
-            console.log('Informations enregistrées :', editableUser);
+    const toggleEditing = async () => {
+        if (isEditing && editableUser) {
+            try {
+                const updated = await updateProfile(user.id, { username: editableUser.username });
+                setUser(updated); // 🔥 Met à jour l'utilisateur dans `AuthContext`
+
+                // 🔥 Notifie le WebSocket du changement
+                socket.emit("updateUser", { userId: updated.id, username: updated.username });
+
+                setError('');
+            } catch (err) {
+                console.error("Erreur de mise à jour :", err);
+                setError(err.message);
+            }
         }
-        setIsEditing(!isEditing); // Alterne entre édition et affichage
+        setIsEditing(!isEditing);
     };
+
+    if (!editableUser) {
+        return <div>Chargement...</div>; // 🔄 Attendre que les données soient chargées
+    }
 
     return (
         <div className="relative bg-[#D9D9D9] bg-opacity-30 backdrop-blur-lg border border-white/40 rounded-2xl p-6 w-80">
-            {/* Bouton paramètres */}
             <button className="absolute top-4 right-4 text-[#8C5B67] hover:text-pink-950 transition">
                 <FiSettings size={20} />
+
             </button>
 
-            {/* Photo de profil */}
             <div className="flex flex-col items-center">
-                <img
-                    src={editableUser.photo}
-                    alt="Photo de profil"
-                    className="w-24 h-24 rounded-full mb-4 border border-white/30 shadow"
-                />
                 {isEditing ? (
                     <input
                         type="text"
@@ -49,27 +63,23 @@ const ProfileCard = ({ user }) => {
                     <h2 className="text-xl font-bold text-[#8C5B67]">{editableUser.username}</h2>
                 )}
                 <p className="text-sm text-[#8C5B67] mb-4">
-                    Compte créé le {editableUser.creationDate}
+                    Compte créé le {new Date(editableUser.createdAt).toLocaleDateString()}
                 </p>
             </div>
 
-            {/* Statistiques */}
             <div className="flex justify-around text-[#8C5B67] text-sm mb-6">
                 <div className="flex flex-col items-center">
-                    <p className="font-bold text-lg">
-                        {editableUser.friends}
-                    </p>
+                    <p className="font-bold text-lg">{editableUser.friends || 0}</p>
                     <p>Amis</p>
                 </div>
                 <div className="flex flex-col items-center">
-                    <p className="font-bold text-lg">
-                        {editableUser.activeChannels}
-                    </p>
+                    <p className="font-bold text-lg">{editableUser.activeChannels || 0}</p>
                     <p>Canaux actifs</p>
                 </div>
             </div>
 
-            {/* Bouton Gérer le profil / Enregistrer */}
+            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
             <button
                 onClick={toggleEditing}
                 className={`w-full py-2 px-4 rounded-lg transition ${

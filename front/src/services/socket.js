@@ -1,9 +1,22 @@
-// services/socket.js
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 
-// Veillez à utiliser le même port que celui sur lequel le serveur écoute
-const socket = io('http://localhost:5000', {
-    transports: ['websocket'] // Optionnel, mais parfois utile pour forcer WebSocket
+const socket = io("http://localhost:5000", {
+    transports: ["websocket"],
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    autoConnect: true,
+});
+
+socket.on("connect", () => {
+    console.log("✅ WebSocket connecté avec succès :", socket.id);
+});
+
+socket.on("connect_error", (error) => {
+    console.error("❌ Erreur de connexion WebSocket :", error.message);
+});
+
+socket.on("disconnect", () => {
+    console.log("❌ WebSocket déconnecté");
 });
 
 export default socket;
