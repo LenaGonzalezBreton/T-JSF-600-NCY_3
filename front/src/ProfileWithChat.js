@@ -6,24 +6,21 @@ import ChatBox from './components/Chatbox';
 import ChannelList from './components/ChannelsList';
 import BottomChannelList from './components/PrivateChannels';
 import ConnectedUsersList from './components/ConnectedUsers';
+import LogoutButton from "./components/LogoutButton";
 
 const ProfileWithChat = () => {
     const { user } = useContext(AuthContext);
 
-    // Si l'utilisateur n'est pas encore chargé, affichez un loader
-    if (!user) {
-        return <div>Chargement...</div>;
-    }
-
     return (
         <div className="relative flex flex-col lg:flex-row min-h-screen w-full">
+
             {/* Section gauche avec la carte de profil et la liste des channels */}
             <div className="flex flex-col lg:w-1/4 p-4 space-y-4 w-full max-w-sm mx-auto lg:mx-0">
                 <ProfileCard user={user} />
                 <ChannelList />
             </div>
 
-            <LogoutButton />
+
 
             {/* Section centrale avec la chatbox */}
             <div className="flex-1 flex justify-center items-start p-4 w-full max-w-4xl mx-auto lg:px-8">
@@ -39,6 +36,7 @@ const ProfileWithChat = () => {
             <div className="fixed bottom-0 w-full flex justify-center p-4 bg-opacity-90 backdrop-blur-md">
                 <BottomChannelList />
             </div>
+
         </div>
     );
 };

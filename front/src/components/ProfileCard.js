@@ -1,11 +1,20 @@
-    import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { FiSettings } from 'react-icons/fi';
 import { updateProfile } from '../services/userService';
+import { AuthContext } from '../context/AuthContext';
 
-const ProfileCard = ({ user }) => {
+const ProfileCard = () => {
+    const { user, setUser } = useContext(AuthContext); // 🔥 Récupère l'utilisateur depuis le contexte
     const [isEditing, setIsEditing] = useState(false);
-    const [editableUser, setEditableUser] = useState(user);
+    const [editableUser, setEditableUser] = useState(null);
     const [error, setError] = useState('');
+
+    // 🔥 Met à jour `editableUser` quand `user` est disponible
+    useEffect(() => {
+        if (user) {
+            setEditableUser(user);
+        }
+    }, [user]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -13,14 +22,14 @@ const ProfileCard = ({ user }) => {
     };
 
     const toggleEditing = async () => {
-        if (isEditing) {
+        if (isEditing && editableUser) {
             try {
-                // Appel de l'API pour mettre à jour le profil utilisateur
-                const updated = await updateProfile(user.userId, {
-                    nickname: editableUser.nickname,
-                    photo: editableUser.photo,
-                });
-                setEditableUser(updated);
+                const updated = await updateProfile(user.id, { username: editableUser.username });
+                setUser(updated); // 🔥 Met à jour l'utilisateur dans `AuthContext`
+
+                // 🔥 Notifie le WebSocket du changement
+                socket.emit("updateUser", { userId: updated.id, username: updated.username });
+
                 setError('');
             } catch (err) {
                 console.error("Erreur de mise à jour :", err);
@@ -30,28 +39,28 @@ const ProfileCard = ({ user }) => {
         setIsEditing(!isEditing);
     };
 
+    if (!editableUser) {
+        return <div>Chargement...</div>; // 🔄 Attendre que les données soient chargées
+    }
+
     return (
         <div className="relative bg-[#D9D9D9] bg-opacity-30 backdrop-blur-lg border border-white/40 rounded-2xl p-6 w-80">
             <button className="absolute top-4 right-4 text-[#8C5B67] hover:text-pink-950 transition">
                 <FiSettings size={20} />
+
             </button>
 
             <div className="flex flex-col items-center">
-                <img
-                    src={editableUser.photo || "https://via.placeholder.com/150"}
-                    alt="Photo de profil"
-                    className="w-24 h-24 rounded-full mb-4 border border-white/30 shadow"
-                />
                 {isEditing ? (
                     <input
                         type="text"
-                        name="nickname"
-                        value={editableUser.nickname}
+                        name="username"
+                        value={editableUser.username}
                         onChange={handleInputChange}
                         className="text-xl font-bold text-center text-[#8C5B67] bg-white border-b border-[#8C5B67] rounded focus:outline-none"
                     />
                 ) : (
-                    <h2 className="text-xl font-bold text-[#8C5B67]">{editableUser.nickname}</h2>
+                    <h2 className="text-xl font-bold text-[#8C5B67]">{editableUser.username}</h2>
                 )}
                 <p className="text-sm text-[#8C5B67] mb-4">
                     Compte créé le {new Date(editableUser.createdAt).toLocaleDateString()}
